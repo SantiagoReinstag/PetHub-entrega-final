@@ -1,0 +1,46 @@
+.home-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #004466, #00aaff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  text-align: center;
+}
+
+.home-title {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px #003344;
+}
+
+.home-description {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+}
+
+.button-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.home-button {
+  padding: 15px 25px;
+  background-color: #ffffff;
+  color: #004466;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.home-button:hover {
+  background-color: #00ccff;
+  transform: scale(1.05);
+}

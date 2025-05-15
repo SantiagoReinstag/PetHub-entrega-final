@@ -1,128 +1,117 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function SignUp() {
-  const navigate = useNavigate();
+function SignUp() {
   const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [contraseña, setContraseña] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSignUp = (e) => {
+  const handleRegistro = async (e) => {
     e.preventDefault();
-    console.log('Nombre:', nombre);
-    console.log('Apellido:', apellido);
-    console.log('Email:', email);
-    console.log('Contraseña:', password);
+    setError('');
 
-    // Simulación de creación de cuenta
-    navigate('/home');
+    try {
+      const response = await fetch('http://localhost:3001/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre,
+          email,
+          password:contraseña,
+          rol_id: 2, 
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Error al registrar el usuario');
+      }
+
+  
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Crear cuenta en PetHub</h1>
-      <form style={styles.formContainer} onSubmit={handleSignUp}>
+      <h2 style={styles.title}>Crear una cuenta</h2>
+      {error && <p style={styles.error}>{error}</p>}
+      <form onSubmit={handleRegistro} style={styles.form}>
         <input
-          type="text"
-          placeholder="Nombre"
           style={styles.input}
+          type="text"
+          placeholder="Nombre completo"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           required
         />
         <input
-          type="text"
-          placeholder="Apellido"
           style={styles.input}
-          value={apellido}
-          onChange={(e) => setApellido(e.target.value)}
-          required
-        />
-        <input
           type="email"
           placeholder="Correo electrónico"
-          style={styles.input}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
+          style={styles.input}
           type="password"
           placeholder="Contraseña"
-          style={styles.input}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={contraseña}
+          onChange={(e) => setContraseña(e.target.value)}
           required
         />
-        <button type="submit" style={styles.signupButton}>Crear cuenta</button>
+        <button style={styles.button} type="submit">Registrarse</button>
       </form>
-      <p style={styles.text}>¿Ya tienes una cuenta?</p>
-      <button
-        style={styles.loginButton}
-        onClick={() => navigate('/')}
-      >
-        Iniciar sesión
-      </button>
     </div>
   );
 }
 
 const styles = {
   container: {
-    height: '100vh',
-    background: 'linear-gradient(135deg, #00aaff 0%, #004466 100%)',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: 'white',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    maxWidth: '400px',
+    margin: '0 auto',
+    padding: '2rem',
+    fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
   },
   title: {
-    fontSize: '3rem',
-    marginBottom: 40,
-    textShadow: '2px 2px 4px #003344'
+    textAlign: 'center',
+    marginBottom: '1rem',
   },
-  formContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 30,
-    borderRadius: 10,
+  error: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: '1rem',
+  },
+  form: {
     display: 'flex',
     flexDirection: 'column',
-    width: 300,
-    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
   },
   input: {
-    marginBottom: 15,
-    padding: 10,
-    borderRadius: 5,
-    border: 'none',
-    fontSize: '1rem',
+    marginBottom: '1rem',
+    padding: '10px',
+    fontSize: '16px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
   },
-  signupButton: {
-    padding: 12,
-    backgroundColor: '#00ccff',
+  button: {
+    padding: '10px',
+    fontSize: '16px',
+    backgroundColor: '#4CAF50',
+    color: '#fff',
     border: 'none',
-    borderRadius: 5,
-    color: '#004466',
-    fontWeight: 'bold',
+    borderRadius: '4px',
     cursor: 'pointer',
-    marginBottom: 15,
-    transition: 'background-color 0.3s',
   },
-  loginButton: {
-    padding: 12,
-    backgroundColor: '#007acc',
-    border: 'none',
-    borderRadius: 5,
-    color: 'white',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-  text: {
-    textAlign: 'center',
-    marginBottom: 10,
-  }
 };
+
+export default SignUp;

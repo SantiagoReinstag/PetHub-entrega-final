@@ -9,7 +9,8 @@ const mascotaController = {
       } else {
         mascotas = await db('mascotas')
           .where('usuario_id', req.user.id)
-          .andWhere('activo', true);
+          .andWhere('activo', true)
+          .select('*');
       }
       res.json(mascotas);
     } catch (err) {
@@ -20,14 +21,18 @@ const mascotaController = {
   crearMascota: async (req, res) => {
     const { nombre, tipo, edad } = req.body;
     try {
-      await db('mascotas').insert({
-        nombre,
-        tipo,
-        edad,
-        usuario_id: req.user.id,
-        activo: true,
-      });
-      res.status(201).json({ mensaje: 'Mascota creada' });
+      const [id] = await db('mascotas')
+        .insert({
+          nombre,
+          tipo,
+          edad,
+          usuario_id: req.user.id,
+          activo: true,
+        })
+        .returning('id');
+
+      const nuevaMascota = await db('mascotas').where({ id }).first();
+      res.status(201).json(nuevaMascota);
     } catch (err) {
       console.error(err);
       res.status(500).json({ mensaje: 'Error al crear mascota' });
@@ -51,7 +56,8 @@ const mascotaController = {
 
       await db('mascotas').where({ id }).update({ nombre, tipo, edad });
 
-      res.json({ mensaje: 'Mascota actualizada' });
+      const mascotaActualizada = await db('mascotas').where({ id }).first();
+      res.json(mascotaActualizada);
     } catch (err) {
       res.status(500).json({ mensaje: 'Error al actualizar mascota' });
     }
@@ -73,7 +79,6 @@ const mascotaController = {
 
       await db('mascotas').where({ id }).update({ activo: false });
 
-      // Desactivar solo citas asociadas a esta mascota
       await db('citas').where({ mascota_id: id }).update({ activo: false });
 
       res.json({ mensaje: 'Mascota y sus citas desactivadas (soft delete)' });

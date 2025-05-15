@@ -7,11 +7,10 @@ function PaginaUsuarios() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const token = localStorage.getItem('token'); // Asegúrate que el token se guarda ahí
-        const response = await fetch('http://localhost:3001/api/usuarios', {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3001/users', {
           headers: {
             Authorization: `Bearer ${token}`,
-
           },
         });
 
@@ -31,24 +30,28 @@ function PaginaUsuarios() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Usuarios Registrados</h2>
-      {error && <p style={styles.error}>{error}</p>}
+      <h1 style={styles.header}>Lista de usuarios registrados</h1>
+      <p style={styles.subtitle}>Aquí puedes ver la información básica de cada cuenta en el sistema.</p>
+      {error && <p style={styles.error}>⚠️ {error}</p>}
+      
       <table style={styles.table}>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
+            <th style={styles.th}>ID</th>
+            <th style={styles.th}>Nombre</th>
+            <th style={styles.th}>Correo</th>
+            <th style={styles.th}>Rol</th>
           </tr>
         </thead>
         <tbody>
           {usuarios.map((usuario) => (
             <tr key={usuario.id}>
-              <td>{usuario.id}</td>
-              <td>{usuario.nombre}</td>
-              <td>{usuario.email}</td>
-              <td>{usuario.rol_id === 1 ? 'Administrador' : 'Usuario'}</td>
+              <td style={styles.td}>{usuario.id}</td>
+              <td style={styles.td}>{usuario.nombre}</td>
+              <td style={styles.td}>{usuario.email}</td>
+              <td style={styles.td}>
+                {usuario.rol_id === 1 ? 'Administrador' : 'Usuario'}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -59,28 +62,44 @@ function PaginaUsuarios() {
 
 const styles = {
   container: {
+    maxWidth: '900px',
+    margin: '0 auto',
     padding: '2rem',
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+    backgroundColor: '#fff',
   },
-  title: {
-    fontSize: '24px',
+  header: {
+    fontSize: '28px',
+    marginBottom: '0.5rem',
+    color: '#333',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: '16px',
+    marginBottom: '1.5rem',
+    textAlign: 'center',
+    color: '#555',
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
     marginBottom: '1rem',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    backgroundColor: '#f9f9f9',
-  },
-  error: {
-    color: 'red',
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
   },
   th: {
-    backgroundColor: '#333',
+    backgroundColor: '#4CAF50',
     color: '#fff',
+    textAlign: 'left',
+    padding: '12px',
   },
   td: {
-    border: '1px solid #ccc',
-    padding: '0.5rem',
+    border: '1px solid #ddd',
+    padding: '10px',
+    fontSize: '14px',
   },
 };
 

@@ -10,9 +10,15 @@ export default function Home() {
       <h1 className="home-title">¡Bienvenido a PetHub!</h1>
       <p className="home-description">Tu espacio para cuidar, organizar y mimar a tus mascotas</p>
       <div className="button-group">
-        <button className="home-button" onClick={() => navigate('/perfil')}>Mi perfil</button>
-        <button className="home-button" onClick={() => navigate('/mascotas')}>Mis mascotas</button>
-        <button className="home-button" onClick={() => navigate('/citas')}>Mis citas</button>
+        <button className="home-button" onClick={() => navigate('/perfil')}>
+          Mi perfil
+        </button>
+        <button className="home-button" onClick={() => navigate('/mascotas')}>
+          Mis mascotas
+        </button>
+        <button className="home-button" onClick={() => navigate('/citas')}>
+          Mis citas
+        </button>
       </div>
     </div>
   );

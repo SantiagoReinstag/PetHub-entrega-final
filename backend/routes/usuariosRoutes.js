@@ -10,7 +10,6 @@ router.post('/signup', usuarioController.createUsuario);
 router.get(
   '/',
   authMiddleware,
-  verificarPermiso('ver_usuarios'),
   usuarioController.getUsuarios
 );
 

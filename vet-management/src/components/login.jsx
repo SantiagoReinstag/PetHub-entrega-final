@@ -23,6 +23,7 @@ export default function Login() {
 
       if (response.ok) {
         localStorage.setItem('token', data.token); 
+        localStorage.setItem('usuarioId', data.id);
         navigate('/home'); 
       } else {
         setError(data.mensaje || 'Credenciales incorrectas');

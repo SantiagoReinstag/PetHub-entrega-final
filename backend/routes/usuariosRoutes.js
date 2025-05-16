@@ -6,14 +6,20 @@ const verificarPermiso = require('../middle/verificarpermiso');
 
 router.post('/signup', usuarioController.createUsuario);
 
-// Ruta protegida con roles
+
 router.get(
   '/',
   authMiddleware,
   usuarioController.getUsuarios
 );
 
-// Soft delete (desactivar usuario)
+
+router.get(
+  '/:id',
+  authMiddleware,
+  usuarioController.getUsuarioPorId
+);
+
 router.patch(
   '/desactivar/:id',
   authMiddleware,
@@ -21,7 +27,6 @@ router.patch(
   usuarioController.desactivarUsuario
 );
 
-// Delete definitivo (solo admin)
 router.delete(
   '/:id',
   authMiddleware,

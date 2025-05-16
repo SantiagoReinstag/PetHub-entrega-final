@@ -1,106 +1,167 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from "react";
+import {jwtDecode} from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
-function PaginaUsuarios() {
-  const [usuarios, setUsuarios] = useState([]);
-  const [error, setError] = useState('');
+const PaginaUsuario = () => {
+  const [usuario, setUsuario] = useState(null);
+  const [error, setError] = useState("");
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [password, setPassword] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUsuarios = async () => {
+    const obtenerUsuario = async (userId) => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/users', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        setLoading(true);
+        setError("");
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`http://localhost:3001/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) {
-          throw new Error('No se pudieron cargar los usuarios');
+        if (!res.ok) {
+          if (res.status === 404) throw new Error("Usuario no encontrado");
+          else throw new Error("Error al cargar perfil");
         }
 
-        const data = await response.json();
-        setUsuarios(data);
+        const data = await res.json();
+        setUsuario(data);
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUsuarios();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("No hay token guardado, por favor inicia sesión");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      const userId = decoded.id;
+
+      if (!userId) {
+        setError("No se pudo extraer el ID del token");
+        setLoading(false);
+        return;
+      }
+
+      obtenerUsuario(userId);
+    } catch {
+      setError("Token inválido o corrupto");
+      setLoading(false);
+    }
   }, []);
 
+  const cerrarSesion = () => {
+    localStorage.removeItem("token");
+    navigate("/"); 
+  };
+
+  const abrirModal = () => {
+    setMostrarModal(true);
+    setPassword("");
+    setMensaje("");
+  };
+
+  const cerrarModal = () => {
+    setMostrarModal(false);
+  };
+
+  const handleEliminarCuenta = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const decoded = jwtDecode(token);
+      const userId = decoded.id;
+
+      const res = await fetch(`http://localhost:3001/users/desactivar/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMensaje(data.mensaje || "Error al eliminar cuenta");
+        return;
+      }
+
+      localStorage.removeItem("token");
+      navigate("/"); 
+    } catch (err) {
+      setMensaje("Error de red o servidor");
+    }
+  };
+
+  if (loading) return <p className="centrado">Cargando perfil...</p>;
+  if (error) return <p className="centrado error">{error}</p>;
+  if (!usuario) return <p className="centrado">No se encontró usuario.</p>;
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Lista de usuarios registrados</h1>
-      <p style={styles.subtitle}>Aquí puedes ver la información básica de cada cuenta en el sistema.</p>
-      {error && <p style={styles.error}>⚠️ {error}</p>}
-      
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>ID</th>
-            <th style={styles.th}>Nombre</th>
-            <th style={styles.th}>Correo</th>
-            <th style={styles.th}>Rol</th>
-          </tr>
-        </thead>
+    <div className="contenedor perfil">
+      <h1>Mi perfil</h1>
+      <table className="tabla">
         <tbody>
-          {usuarios.map((usuario) => (
-            <tr key={usuario.id}>
-              <td style={styles.td}>{usuario.id}</td>
-              <td style={styles.td}>{usuario.nombre}</td>
-              <td style={styles.td}>{usuario.email}</td>
-              <td style={styles.td}>
-                {usuario.rol_id === 1 ? 'Administrador' : 'Usuario'}
-              </td>
-            </tr>
-          ))}
+          <tr>
+            <th>Nombre</th>
+            <td>{usuario.nombre}</td>
+          </tr>
+          <tr>
+            <th>Correo</th>
+            <td>{usuario.email}</td>
+          </tr>
+          <tr>
+            <th>Rol</th>
+            <td>{usuario.rol_id === 1 ? "Administrador" : "Usuario"}</td>
+          </tr>
         </tbody>
       </table>
+
+      <div className="botones">
+        <button className="cerrar" onClick={cerrarSesion}>
+          Cerrar sesión
+        </button>
+        <button className="eliminar" onClick={abrirModal}>
+          Eliminar cuenta
+        </button>
+      </div>
+
+      {mostrarModal && (
+        <div className="modal-fondo">
+          <div className="modal">
+            <h2>Confirmar eliminación</h2>
+            <p>Ingresa tu contraseña para confirmar:</p>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+            />
+            {mensaje && <p className="error">{mensaje}</p>}
+            <div className="modal-botones">
+              <button className="confirmar" onClick={handleEliminarCuenta}>
+                Eliminar
+              </button>
+              <button className="cancelar" onClick={cerrarModal}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-const styles = {
-  container: {
-    maxWidth: '900px',
-    margin: '0 auto',
-    padding: '2rem',
-    fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-    backgroundColor: '#fff',
-  },
-  header: {
-    fontSize: '28px',
-    marginBottom: '0.5rem',
-    color: '#333',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: '16px',
-    marginBottom: '1.5rem',
-    textAlign: 'center',
-    color: '#555',
-  },
-  error: {
-    color: 'red',
-    textAlign: 'center',
-    marginBottom: '1rem',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  th: {
-    backgroundColor: '#4CAF50',
-    color: '#fff',
-    textAlign: 'left',
-    padding: '12px',
-  },
-  td: {
-    border: '1px solid #ddd',
-    padding: '10px',
-    fontSize: '14px',
-  },
 };
 
-export default PaginaUsuarios;
+export default PaginaUsuario;

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
+  res.setHeader("X-Middleware-Activo", "true"); 
   const authHeader = req.headers.authorization;
 
   if (!authHeader) return res.status(401).json({ mensaje: 'No token provided' });
@@ -10,7 +11,8 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Datos del usuario para usar en rutas protegidas
+    console.log('Decoded user from token:', decoded);
+    req.user = decoded; 
     next();
   } catch (error) {
     return res.status(401).json({ mensaje: 'Token inválido o expirado' });

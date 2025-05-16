@@ -21,7 +21,7 @@ const mascotaController = {
   crearMascota: async (req, res) => {
     const { nombre, tipo, edad } = req.body;
     try {
-      const [id] = await db('mascotas')
+      const [{id}] = await db('mascotas')
         .insert({
           nombre,
           tipo,

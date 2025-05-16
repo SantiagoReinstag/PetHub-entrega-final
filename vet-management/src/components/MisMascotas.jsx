@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import api from '../axiosconfig'; 
+import api from '../axiosconfig';
+import './MisMascotas.css';
 
 const MisMascotas = () => {
   const [mascotas, setMascotas] = useState([]);
@@ -8,6 +9,8 @@ const MisMascotas = () => {
     tipo: '',
     edad: '',
   });
+
+  const esAdmin = localStorage.getItem('rol') === 'admin';
 
   const obtenerMascotas = async () => {
     try {
@@ -40,11 +43,29 @@ const MisMascotas = () => {
     }
   };
 
-  return (
-    <div>
-      <h2>Mis Mascotas</h2>
+  const handleDesactivar = async (id) => {
+    try {
+      await api.patch(`/mascotas/desactivar/${id}`);
+      setMascotas(mascotas.map((m) => (m.id === id ? { ...m, activo: false } : m)));
+    } catch (err) {
+      console.error('Error al desactivar mascota:', err);
+    }
+  };
 
-      <form onSubmit={handleSubmit}>
+  const handleEliminar = async (id) => {
+    try {
+      await api.delete(`/mascotas/${id}`);
+      setMascotas(mascotas.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error('Error al eliminar mascota:', err);
+    }
+  };
+
+  return (
+    <div className="contenedor">
+      <h2 className="titulo">Mis Mascotas</h2>
+
+      <form onSubmit={handleSubmit} className="formulario">
         <input
           type="text"
           name="nombre"
@@ -52,6 +73,7 @@ const MisMascotas = () => {
           value={formulario.nombre}
           onChange={handleChange}
           required
+          className="flexible"
         />
         <input
           type="text"
@@ -60,6 +82,7 @@ const MisMascotas = () => {
           value={formulario.tipo}
           onChange={handleChange}
           required
+          className="flexible"
         />
         <input
           type="number"
@@ -68,26 +91,62 @@ const MisMascotas = () => {
           value={formulario.edad}
           onChange={handleChange}
           required
+          className="edad"
         />
-        <button type="submit">Agregar Mascota</button>
+        <button type="submit">Agregar</button>
       </form>
 
-      <table>
+      <table className="tabla">
         <thead>
           <tr>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Edad</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {mascotas.map((m) => (
-            <tr key={m.id}>
-              <td>{m.nombre}</td>
-              <td>{m.tipo}</td>
-              <td>{m.edad}</td>
-            </tr>
-          ))}
+          {mascotas
+            .filter((m) => m.activo)
+            .map((m) => (
+              <tr key={m.id}>
+                <td>{m.nombre}</td>
+                <td>{m.tipo}</td>
+                <td>{m.edad}</td>
+                <td>
+                  {esAdmin ? (
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            '¿Seguro que quieres eliminar el perfil de esta mascota?'
+                          )
+                        ) {
+                          handleEliminar(m.id);
+                        }
+                      }}
+                      className="boton-eliminar"
+                    >
+                      Eliminar
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            '¿Seguro que quieres desactivar el perfil de esta mascota?'
+                          )
+                        ) {
+                          handleDesactivar(m.id);
+                        }
+                      }}
+                    >
+                      Desactivar
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

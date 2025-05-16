@@ -13,21 +13,26 @@ const login = async (req, res) => {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
 
+    if (!usuario.activo) {
+      return res.status(403).json({ mensaje: "Usuario eliminado o desactivado" });
+    }
+
     const valid = await bcrypt.compare(password, usuario.password);
     if (!valid) {
       return res.status(401).json({ mensaje: "Contraseña incorrecta" });
     }
 
-    // Convertir rol_id a número si es string o asignar "user" por defecto
     const rol = typeof usuario.rol_id === 'number' ? usuario.rol_id : (usuario.rol_id || 2);
+    const id = usuario.id;  // <----- Agregado
 
     const token = jwt.sign(
-      { id: usuario.id, rol: rol },
+      { id, rol },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.json({ token });
+    res.json({ token, id }); 
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error en el servidor" });

@@ -1,0 +1,105 @@
+/* MisMascotas.css */
+
+.contenedor {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.titulo {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.formulario {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.formulario input.flexible {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formulario input.edad {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formulario button {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.formulario button:hover {
+  background-color: #115293;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla thead tr {
+  background: #f0f0f0;
+}
+
+.tabla th, .tabla td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.tabla tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.boton-eliminar {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-left: 5px;
+}
+
+.boton-eliminar:hover {
+  background-color: #ba000d;
+}
+
+button {
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: default;
+}

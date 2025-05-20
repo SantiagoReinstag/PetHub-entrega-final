@@ -99,6 +99,7 @@ const MisMascotas = () => {
       <table className="tabla">
         <thead>
           <tr>
+            <th>ID</th> {/* Nueva columna ID */}
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Edad</th>
@@ -106,47 +107,35 @@ const MisMascotas = () => {
           </tr>
         </thead>
         <tbody>
-          {mascotas
-            .filter((m) => m.activo)
-            .map((m) => (
-              <tr key={m.id}>
-                <td>{m.nombre}</td>
-                <td>{m.tipo}</td>
-                <td>{m.edad}</td>
-                <td>
-                  {esAdmin ? (
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            '¿Seguro que quieres eliminar el perfil de esta mascota?'
-                          )
-                        ) {
-                          handleEliminar(m.id);
-                        }
-                      }}
-                      className="boton-eliminar"
-                    >
-                      Eliminar
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            '¿Seguro que quieres desactivar el perfil de esta mascota?'
-                          )
-                        ) {
-                          handleDesactivar(m.id);
-                        }
-                      }}
-                    >
-                      Desactivar
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+          {mascotas.filter(m => m.activo).map(m => (
+            <tr key={m.id}>
+              <td>{m.id}</td><td>{m.nombre}</td><td>{m.tipo}</td><td>{m.edad}</td>
+              <td>
+                {esAdmin ? (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('¿Seguro que quieres eliminar el perfil de esta mascota?')) {
+                        handleEliminar(m.id);
+                      }
+                    }}
+                    className="boton-eliminar"
+                  >
+                    Eliminar
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('¿Seguro que quieres desactivar el perfil de esta mascota?')) {
+                        handleDesactivar(m.id);
+                      }
+                    }}
+                  >
+                    Desactivar
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

@@ -78,8 +78,7 @@ const getUsuarioPorId = async (req, res) => {
 const desactivarUsuario = async (req, res) => {
   const { id } = req.params;
 
-
-  if (req.user.rol !== 1 && String(req.user.id) !== Number(id)) {
+  if (req.user.rol !== 1 && String(req.user.id) !== id) {
     return res.status(403).json({ mensaje: 'No autorizado para desactivar este usuario' });
   }
 
@@ -102,9 +101,7 @@ const desactivarUsuario = async (req, res) => {
 
 // Eliminar usuario (solo admin)
 const eliminarUsuario = async (req, res) => {
-  if (req.user.rol !== 1) {
-    return res.status(403).json({ mensaje: 'Solo admins pueden eliminar usuarios definitivamente' });
-  }
+  // Permiso ya validado en middleware, no checamos rol aquí
 
   const { id } = req.params;
 

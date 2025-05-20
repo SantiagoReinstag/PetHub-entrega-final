@@ -118,3 +118,17 @@
   text-align: center;
   padding: 2rem;
 }
+.btn-rojo {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.btn-rojo:hover {
+  background-color: #b71c1c;
+}

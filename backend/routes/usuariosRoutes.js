@@ -2,34 +2,31 @@ const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
 const authMiddleware = require('../middle/authMiddleware');
+const agregarPermisos= require("../middle/agregarPermisos")
 const verificarPermiso = require('../middle/verificarpermiso');
 
 router.post('/signup', usuarioController.createUsuario);
 
 
-router.get(
-  '/',
-  authMiddleware,
-  usuarioController.getUsuarios
-);
+
+router.use(authMiddleware);
+router.use(agregarPermisos);
 
 
-router.get(
-  '/:id',
-  authMiddleware,
-  usuarioController.getUsuarioPorId
-);
+router.get('/', usuarioController.getUsuarios);
+
+
+router.get('/:id', usuarioController.getUsuarioPorId);
 
 router.patch(
   '/desactivar/:id',
-  authMiddleware,
-  verificarPermiso('borrar_usuarios'),
+  verificarPermiso('desactivar_cuenta'),
   usuarioController.desactivarUsuario
 );
 
+
 router.delete(
   '/:id',
-  authMiddleware,
   verificarPermiso('borrar_usuarios'),
   usuarioController.eliminarUsuario
 );

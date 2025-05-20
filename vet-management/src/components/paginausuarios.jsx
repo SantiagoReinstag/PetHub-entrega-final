@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import "./paginausuario.css"
 
 const PaginaUsuario = () => {
   const [usuario, setUsuario] = useState(null);
@@ -62,7 +63,7 @@ const PaginaUsuario = () => {
 
   const cerrarSesion = () => {
     localStorage.removeItem("token");
-    navigate("/"); 
+    navigate("/");
   };
 
   const abrirModal = () => {
@@ -98,7 +99,7 @@ const PaginaUsuario = () => {
       }
 
       localStorage.removeItem("token");
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
       setMensaje("Error de red o servidor");
     }
@@ -113,6 +114,10 @@ const PaginaUsuario = () => {
       <h1>Mi perfil</h1>
       <table className="tabla">
         <tbody>
+          <tr>
+            <th>ID</th>
+            <td>{usuario.id}</td>
+          </tr>
           <tr>
             <th>Nombre</th>
             <td>{usuario.nombre}</td>
@@ -129,10 +134,10 @@ const PaginaUsuario = () => {
       </table>
 
       <div className="botones">
-        <button className="cerrar" onClick={cerrarSesion}>
+        <button className="btn-rojo" onClick={cerrarSesion}>
           Cerrar sesión
         </button>
-        <button className="eliminar" onClick={abrirModal}>
+        <button className="btn-rojo" onClick={abrirModal}>
           Eliminar cuenta
         </button>
       </div>

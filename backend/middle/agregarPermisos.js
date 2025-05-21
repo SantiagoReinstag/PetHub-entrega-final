@@ -1,7 +1,6 @@
 const db = require("../db");
 
 const obtenerPermisos = async (rolId) => {
-  // Aquí deberías definir cómo obtienes los permisos desde tu base de datos
   const filas = await db('permisos')
     .join('rol_permiso', 'permisos.id', 'rol_permiso.permiso_id')
     .where('rol_permiso.rol_id', rolId)

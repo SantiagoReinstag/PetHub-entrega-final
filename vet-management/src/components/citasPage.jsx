@@ -54,8 +54,7 @@ const CitasPage = () => {
       if (res.status >= 200 && res.status < 300) {
         alert('Cita creada exitosamente. Por favor, recargue la página para confirmar.');
         setFormulario({ fecha: '', hora: '', descripcion: '', mascotaId: '' });
-        // Si quieres actualizar automáticamente la lista sin recargar:
-        // await obtenerCitas();
+
       }
     } catch (err) {
       if (err.response && err.response.status === 409) {

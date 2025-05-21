@@ -7,6 +7,11 @@ import Home from './components/Home';
 
 import PaginaUsuarios from './components/paginausuarios';
 import MisMascotas from './components/MisMascotas'; 
+import CitasPage from './components/citasPage';
+
+
+
+
 
 function App() {
   return (
@@ -18,6 +23,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/perfil" element={<PaginaUsuarios />} />
         <Route path="/mascotas" element={<MisMascotas />} />
+        <Route path="/citas" element={<CitasPage />} />
       </Routes>
     </Router>
   );

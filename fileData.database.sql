@@ -5,7 +5,7 @@
 -- Dumped from database version 17.4
 -- Dumped by pg_dump version 17.4
 
--- Started on 2025-05-15 09:23:35
+-- Started on 2025-05-20 23:33:20
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -387,12 +387,23 @@ ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usu
 --
 
 COPY public.citas (id, fecha_cita, motivo, mascota_id, usuario_id, activo, fecha_creacion, asistio) FROM stdin;
-1	2025-05-20 14:30:00	Consulta general	3	6	t	2025-05-15 07:12:19.23037	f
 2	2025-05-20 10:00:00	Vacunación anual	1	7	f	2025-05-15 07:13:29.173681	f
-3	2025-06-01 10:00:00	Revisión general	3	7	f	2025-05-15 07:13:40.690179	t
 6	2025-06-01 10:30:00	Consulta veterinaria general	5	9	f	2025-05-15 08:20:34.558343	f
 5	2025-06-01 10:30:00	Consulta veterinaria general	6	9	f	2025-05-15 08:16:24.653566	f
+3	2025-06-01 10:00:00	Revisión general	3	7	f	2025-05-15 07:13:40.690179	t
 4	2025-06-01 10:30:00	Consulta veterinaria general	3	9	f	2025-05-15 08:16:13.804748	f
+1	2025-05-20 14:30:00	Consulta general	3	6	f	2025-05-15 07:12:19.23037	f
+7	2025-05-21 10:41:00	veterinaria general	23	23	t	2025-05-20 22:50:53.697098	f
+8	2025-05-21 08:51:00	veterinaria general	23	23	f	2025-05-20 22:51:33.603269	f
+9	2025-05-20 20:52:00	veterinaria general	24	23	f	2025-05-20 22:52:37.950893	f
+10	2025-05-20 11:02:00	veterinaria general	24	23	f	2025-05-20 23:03:07.283676	f
+11	2025-05-21 15:12:00	veterinaria general	23	23	f	2025-05-20 23:12:57.607618	f
+12	2025-05-30 11:18:00	vacunacion	24	23	f	2025-05-20 23:16:48.029527	f
+13	2025-05-29 11:20:00	vacunacion	24	23	f	2025-05-20 23:20:08.004382	f
+14	2025-05-23 13:24:00	vacunacion	23	23	f	2025-05-20 23:24:29.171959	f
+15	2025-05-30 11:25:00	vacunacion	24	23	t	2025-05-20 23:25:31.020581	f
+16	2025-05-28 14:03:00	vacunacion	23	23	f	2025-05-20 23:27:49.249921	f
+17	2025-05-28 11:30:00	vacunacion	23	23	t	2025-05-20 23:30:04.808643	f
 \.
 
 
@@ -404,11 +415,33 @@ COPY public.citas (id, fecha_cita, motivo, mascota_id, usuario_id, activo, fecha
 
 COPY public.mascotas (id, nombre, tipo, edad, usuario_id, activo, fecha_creacion) FROM stdin;
 1	Firulais	Perro	3	7	f	2025-05-15 06:40:03.291604
-2	Luna	\N	1	8	t	2025-05-15 06:42:14.212204
-3	Michi	\N	2	8	t	2025-05-15 06:42:31.76213
 4	Fido	Perro	3	9	f	2025-05-15 08:12:55.132209
 5	Michi	Gato	2	9	f	2025-05-15 08:13:03.690843
 6	Loro	Ave	1	9	f	2025-05-15 08:13:13.717904
+7	Sasa	\N	12	17	t	2025-05-15 12:04:24.695
+8	miguelito	perro	4	17	t	2025-05-15 12:09:58.09859
+2	Luna	\N	1	8	f	2025-05-15 06:42:14.212204
+3	Michi	\N	2	8	f	2025-05-15 06:42:31.76213
+13	Dafne 	gato 	7	18	f	2025-05-15 22:00:56.500091
+14	Azura	loro	4	18	f	2025-05-15 22:06:18.010037
+9	Sasa	perro	12	6	f	2025-05-15 21:22:31.913064
+10	Sasa	perro	12	6	f	2025-05-15 21:36:59.589778
+11	miguelito	gato 	1	6	f	2025-05-15 21:37:11.995932
+12	petsi	gato 	4	6	f	2025-05-15 21:54:26.869294
+15	nemo	pez	4	20	f	2025-05-19 14:10:34.669573
+16	jose luis el mago de la eterna juventud 	perro	12	18	t	2025-05-19 23:41:11.477795
+17	mani	perro 	15	22	f	2025-05-19 23:42:22.295835
+19	pepita	loro	6	22	f	2025-05-19 23:42:47.117385
+18	juan	hamster	2	22	f	2025-05-19 23:42:34.636315
+20	Sasa	gato 	5	22	f	2025-05-19 23:43:08.12631
+21	firulais	perro	4	18	t	2025-05-20 00:02:18.022897
+22	nemo	pez	1	18	t	2025-05-20 00:02:30.369622
+23	josefito	perro caniche	12	23	t	2025-05-20 13:47:18.171468
+24	manchas	gato	4	23	t	2025-05-20 13:47:27.994686
+26	juanito	pez	2	23	t	2025-05-20 14:01:21.366675
+25	Joe rivera  	can	13	23	f	2025-05-20 13:47:53.744118
+27	coco	perro poodle	6	23	t	2025-05-20 22:15:22.234295
+28	firulais	gato 	12	23	t	2025-05-20 23:30:23.911833
 \.
 
 
@@ -432,9 +465,12 @@ COPY public.permisos (id, nombre) FROM stdin;
 23	editar_mascotas
 24	borrar_mascotas
 25	ver_citas
-26	crear_citas
 27	editar_citas
 28	borrar_citas
+30	desactivar_cuenta
+31	ver_citas_admin
+32	desactivar_cita
+26	crear_cita
 \.
 
 
@@ -469,6 +505,11 @@ COPY public.rol_permiso (rol_id, permiso_id, id) FROM stdin;
 2	26	\N
 2	27	\N
 2	28	\N
+2	30	\N
+1	30	\N
+1	31	\N
+1	32	\N
+2	32	\N
 \.
 
 
@@ -523,10 +564,17 @@ COPY public.usuarios (id, nombre, email, password, rol_id, activo, fecha_creacio
 1	Juan Pérez	juan@example.com	$2b$10$vlELDxZZZV2CDa7TVW65hOPCCYo1aynoBRUQeP0zE9aq4GUIeD4SS	1	t	2025-05-14 19:16:39.447475
 2	\N	\N	$2b$10$V/AvyUsWrmosbsRe2OQQVeiqcFL/LKfq9K6R3318sSiNyUsrXyM8.	\N	t	2025-05-14 22:41:50.650355
 5	\N	\N	$2b$10$k05scDEZFmUcxJGqVZfuj.exbCkhPv.Omcm4uhAID3QG/IA2h/2Bi	\N	t	2025-05-14 22:43:57.671196
-6	Juan Perez	juan@mail.com	$2b$10$IzpWhmsHmSzoyJC/UPbGAO4g/2VdCubBT5ubcfe1GQ/V/Xy1ukIYq	1	t	2025-05-14 22:48:48.712921
 8	Jose diaz	jose@mail.com	$2b$10$w/LlJ25hflNGL68sILdw8O0iM3JnMSG1EOiFEp0oXqy/ExmI9igS2	1	t	2025-05-15 06:26:51.630766
 7	Miguel Gomes	miguel@mail.com	$2b$10$uwt0VjjulHWu8m8/IKVmDuRaPvQtanhwIka99hYO3S6NKZXUyiEve	2	f	2025-05-15 02:41:50.268521
 9	Jota mario	jueje@example.com	$2b$10$EKDa2gNaIYMRpRCMpPeasuqoAGZ/p/YP4KLqB8FuUaGLpSzaiB7GC	2	f	2025-05-15 08:09:53.816998
+10	Santiago	san@mail.com	$2b$10$tY1Z3csl9MXHsJM4Fo/Al.8VzHG3ygnMcTTw8OiMMIMQrIrBFBaBq	2	t	2025-05-15 11:39:26.373673
+17	jose jose	josefin@mail.com	$2b$10$G1uP1HljOv9r0oSSydxpCeEJyG8eX5rTEs9j6m8EYTb3JHjNg7VLG	2	t	2025-05-15 11:43:24.660639
+18	manuel antonio	manu@mail.com	$2b$10$vQ5abtf1qG.JiDDnz2iME.m/Yaw.k7doIAB6ohl6ltLCZRftJOCcW	2	t	2025-05-15 21:55:21.765703
+19	Ana Pérez	ana@example.com	$2b$10$ejUkjGiBKUxgTp15ztr1wuzLGvcnjEzf4vKXzHAmvzWZb2XzaqckW	1	t	2025-05-15 23:27:50.838415
+6	Juan Perez	juan@mail.com	$2b$10$IzpWhmsHmSzoyJC/UPbGAO4g/2VdCubBT5ubcfe1GQ/V/Xy1ukIYq	1	f	2025-05-14 22:48:48.712921
+20	Miguel Angel	mapuentesd@mail.com	$2b$10$4dnLM3NQQ3sXNNvCrymiyehkZCRg.nxnsDJBGFGLNqbyBZPxb5OK6	2	f	2025-05-19 14:09:40.838961
+22	felipe diaz	felipe@mail.com	$2b$10$MDeO/STx0mn54i3eR5pEce9iiW/isieEzRn6PZV6OUrQNSxMAQsk2	2	f	2025-05-19 23:41:50.201815
+23	Oscar Mahecha	maecha@mail.com	$2b$10$a6pB1pWlxkwWMInx44gaFOBrBy9Sp3jX8rS8IDgUE/yPyzTp542ri	2	t	2025-05-20 13:46:39.525077
 \.
 
 
@@ -536,7 +584,7 @@ COPY public.usuarios (id, nombre, email, password, rol_id, activo, fecha_creacio
 -- Name: citas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.citas_id_seq', 6, true);
+SELECT pg_catalog.setval('public.citas_id_seq', 17, true);
 
 
 --
@@ -545,7 +593,7 @@ SELECT pg_catalog.setval('public.citas_id_seq', 6, true);
 -- Name: mascotas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mascotas_id_seq', 6, true);
+SELECT pg_catalog.setval('public.mascotas_id_seq', 28, true);
 
 
 --
@@ -554,7 +602,7 @@ SELECT pg_catalog.setval('public.mascotas_id_seq', 6, true);
 -- Name: permisos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.permisos_id_seq', 29, true);
+SELECT pg_catalog.setval('public.permisos_id_seq', 32, true);
 
 
 --
@@ -590,7 +638,7 @@ SELECT pg_catalog.setval('public.users_id_seq', 8, true);
 -- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuarios_id_seq', 9, true);
+SELECT pg_catalog.setval('public.usuarios_id_seq', 23, true);
 
 
 --
@@ -764,7 +812,7 @@ ALTER TABLE ONLY public.usuarios
     ADD CONSTRAINT usuarios_rol_id_fkey FOREIGN KEY (rol_id) REFERENCES public.roles(id);
 
 
--- Completed on 2025-05-15 09:23:35
+-- Completed on 2025-05-20 23:33:26
 
 --
 -- PostgreSQL database dump complete

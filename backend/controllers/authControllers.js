@@ -3,6 +3,13 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const db = require("../db");
 
+// Ejemplo simple de permisos por rol (puedes ajustar según tu modelo real)
+const permisosPorRol = {
+  1: ['ver_citas_admin', 'crear_cita', 'editar_cita', 'desactivar_cita', 'eliminar_cita', 'ver_citas'], // Admin
+  2: ['ver_citas', 'crear_cita'], // Usuario normal
+  // otros roles...
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -23,15 +30,18 @@ const login = async (req, res) => {
     }
 
     const rol = typeof usuario.rol_id === 'number' ? usuario.rol_id : (usuario.rol_id || 2);
-    const id = usuario.id;  // <----- Agregado
+    const id = usuario.id;
+
+    // Obtener permisos según el rol, o un arreglo vacío si no definido
+    const permisos = permisosPorRol[rol] || [];
 
     const token = jwt.sign(
-      { id, rol },
+      { id, rol, permisos },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.json({ token, id }); 
+    res.json({ token, id });
 
   } catch (error) {
     console.error(error);

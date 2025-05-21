@@ -1,16 +1,18 @@
 const db = require('../db');
 
+const ROLES = {
+  ADMIN: 1,
+  USUARIO: 2
+};
+
 const citaController = {
-  obtenerCitas: async (req, res) => {
+  obtenerTodasCitasAdmin: async (req, res) => {
     try {
-      let citas;
-      if (req.user.rol === 1) {  // admin
-        citas = await db('citas').where('activo', true).select('*');
-      } else {
-        citas = await db('citas')
-          .where('usuario_id', req.user.id)
-          .andWhere('activo', true);
+      if (req.user.rol !== ROLES.ADMIN) {
+        return res.status(403).json({ mensaje: 'No autorizado' });
       }
+
+      const citas = await db('citas').select('*');
       res.json(citas);
     } catch (err) {
       console.error(err);
@@ -18,31 +20,71 @@ const citaController = {
     }
   },
 
-  crearCita: async (req, res) => {
-    const { fecha_cita, motivo, mascota_id } = req.body;
+  obtenerCitasActivasUsuario: async (req, res) => {
     try {
-      // Verificar que la mascota exista y esté activa
+      const citas = await db('citas')
+        .where({ usuario_id: req.user.id, activo: true });
+      res.json(citas);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ mensaje: 'Error al obtener citas activas' });
+    }
+  },
+
+  obtenerCitasInactivasUsuario: async (req, res) => {
+    try {
+      const citas = await db('citas')
+        .where({ usuario_id: req.user.id, activo: false });
+      res.json(citas);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ mensaje: 'Error al obtener citas inactivas' });
+    }
+  },
+
+  crearCita: async (req, res) => {
+    const { fecha, hora, descripcion, mascotaId } = req.body;
+
+    try {
       const mascota = await db('mascotas')
-        .where({ id: mascota_id, activo: true })
+        .where({ id: mascotaId, activo: true })
         .first();
 
       if (!mascota) {
         return res.status(404).json({ mensaje: 'Mascota no encontrada o desactivada' });
       }
 
-      // Si no es admin, validar que la mascota pertenezca al usuario
-      if (req.user.rol !== 1 && mascota.usuario_id !== req.user.id) {
+      if (req.user.rol !== ROLES.ADMIN && mascota.usuario_id !== req.user.id) {
         return res.status(403).json({ mensaje: 'No autorizado para crear cita para esta mascota' });
       }
 
-      await db('citas').insert({
+      const fecha_cita = new Date(`${fecha}T${hora}:00`);
+
+      if (isNaN(fecha_cita.getTime())) {
+        return res.status(400).json({ mensaje: 'Fecha o hora inválida' });
+      }
+
+      if (req.user.rol === ROLES.USUARIO) {
+        const ahora = new Date();
+        const diferenciaHoras = (fecha_cita - ahora) / (1000 * 60 * 60);
+        if (diferenciaHoras < 12) {
+          return res.status(400).json({
+            mensaje: 'Los usuarios deben programar la cita con al menos 12 horas de anticipación'
+          });
+        }
+      }
+
+      const [{ id: nuevaId }] = await db('citas').insert({
         fecha_cita,
-        motivo,
-        mascota_id,
+        motivo: descripcion,
+        mascota_id: mascotaId,
         usuario_id: req.user.id,
         activo: true
-      });
-      res.status(201).json({ mensaje: 'Cita creada' });
+      }).returning('id');
+
+      const nuevaCita = await db('citas').where({ id: nuevaId }).first();
+
+      res.status(201).json(nuevaCita);
     } catch (err) {
       console.error(err);
       res.status(500).json({ mensaje: 'Error al crear cita' });
@@ -51,42 +93,54 @@ const citaController = {
 
   actualizarCita: async (req, res) => {
     const { id } = req.params;
-    const { fecha_cita, motivo, mascota_id, asistio } = req.body;
+    const { fecha, hora, descripcion, mascotaId, asistio } = req.body;
 
     try {
-      let cita;
-      if (req.user.rol === 1) {  // admin
-        cita = await db('citas').where({ id, activo: true }).first();
-      } else {
-        cita = await db('citas').where({ id, usuario_id: req.user.id, activo: true }).first();
-      }
+      const cita = req.user.rol === ROLES.ADMIN
+        ? await db('citas').where({ id: parseInt(id), activo: true }).first()
+        : await db('citas').where({ id: parseInt(id), usuario_id: req.user.id, activo: true }).first();
 
-      if (!cita) return res.status(403).json({ mensaje: 'No autorizado' });
+      if (!cita) return res.status(403).json({ mensaje: 'No autorizado o cita no encontrada' });
 
-      // Si la mascota_id cambia, verificar que la nueva mascota pertenezca al usuario (o admin)
-      if (mascota_id && req.user.rol !== 1) {
-        const nuevaMascota = await db('mascotas').where({ id: mascota_id, activo: true }).first();
-        if (!nuevaMascota) {
-          return res.status(404).json({ mensaje: 'Nueva mascota no encontrada o desactivada' });
-        }
-        if (nuevaMascota.usuario_id !== req.user.id) {
-          return res.status(403).json({ mensaje: 'No autorizado para asignar esta mascota a la cita' });
+      if (mascotaId && req.user.rol !== ROLES.ADMIN) {
+        const nuevaMascota = await db('mascotas').where({ id: mascotaId, activo: true }).first();
+        if (!nuevaMascota || nuevaMascota.usuario_id !== req.user.id) {
+          return res.status(403).json({ mensaje: 'No autorizado para asignar esta mascota' });
         }
       }
 
-      const camposActualizar = {
-        fecha_cita,
-        motivo,
-        mascota_id
-      };
+      const camposActualizar = {};
 
-      // Solo admin puede modificar "asistio"
-      if (req.user.rol === 1) {
-        camposActualizar.asistio = asistio;
+      if (fecha !== undefined && hora !== undefined) {
+        const nuevaFechaCita = new Date(`${fecha}T${hora}:00`);
+        if (isNaN(nuevaFechaCita.getTime())) {
+          return res.status(400).json({ mensaje: 'Fecha o hora inválida' });
+        }
+
+        if (req.user.rol === ROLES.USUARIO) {
+          const ahora = new Date();
+          const diferenciaHoras = (nuevaFechaCita - ahora) / (1000 * 60 * 60);
+          if (diferenciaHoras < 12) {
+            return res.status(400).json({
+              mensaje: 'Los usuarios deben reprogramar la cita con al menos 12 horas de anticipación'
+            });
+          }
+        }
+
+        camposActualizar.fecha_cita = nuevaFechaCita;
+      } else if (fecha !== undefined || hora !== undefined) {
+        return res.status(400).json({ mensaje: 'Se requieren fecha y hora para actualizar la cita' });
       }
 
-      await db('citas').where({ id }).update(camposActualizar);
+      if (descripcion !== undefined) camposActualizar.motivo = descripcion;
+      if (mascotaId !== undefined) camposActualizar.mascota_id = mascotaId;
+      if (req.user.rol === ROLES.ADMIN && asistio !== undefined) camposActualizar.asistio = asistio;
 
+      if (Object.keys(camposActualizar).length === 0) {
+        return res.status(400).json({ mensaje: 'No hay campos para actualizar' });
+      }
+
+      await db('citas').where({ id: parseInt(id) }).update(camposActualizar);
       res.json({ mensaje: 'Cita actualizada' });
     } catch (err) {
       console.error(err);
@@ -98,17 +152,13 @@ const citaController = {
     const { id } = req.params;
 
     try {
-      let cita;
-      if (req.user.rol === 1) {  // admin
-        cita = await db('citas').where({ id, activo: true }).first();
-      } else {
-        cita = await db('citas').where({ id, usuario_id: req.user.id, activo: true }).first();
-      }
+      const cita = req.user.rol === ROLES.ADMIN
+        ? await db('citas').where({ id: parseInt(id), activo: true }).first()
+        : await db('citas').where({ id: parseInt(id), usuario_id: req.user.id, activo: true }).first();
 
-      if (!cita) return res.status(403).json({ mensaje: 'No autorizado' });
+      if (!cita) return res.status(403).json({ mensaje: 'No autorizado o cita no encontrada' });
 
-      await db('citas').where({ id }).update({ activo: false });
-
+      await db('citas').where({ id: parseInt(id) }).update({ activo: false });
       res.json({ mensaje: 'Cita desactivada (soft delete)' });
     } catch (err) {
       console.error(err);
@@ -120,16 +170,13 @@ const citaController = {
     const { id } = req.params;
 
     try {
-      let cita;
-      if (req.user.rol === 1) {  // admin
-        cita = await db('citas').where({ id }).first();
-      } else {
-        cita = await db('citas').where({ id, usuario_id: req.user.id }).first();
-      }
+      const cita = req.user.rol === ROLES.ADMIN
+        ? await db('citas').where({ id: parseInt(id) }).first()
+        : await db('citas').where({ id: parseInt(id), usuario_id: req.user.id }).first();
 
-      if (!cita) return res.status(403).json({ mensaje: 'No autorizado' });
+      if (!cita) return res.status(403).json({ mensaje: 'No autorizado o cita no encontrada' });
 
-      await db('citas').where({ id }).del();
+      await db('citas').where({ id: parseInt(id) }).del();
       res.json({ mensaje: 'Cita eliminada definitivamente' });
     } catch (err) {
       console.error(err);

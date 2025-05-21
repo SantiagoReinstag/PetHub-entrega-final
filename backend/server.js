@@ -18,17 +18,17 @@ app.use(cors({
   credentials: true
 }));
 
-// Middleware para parsear JSON
+
 app.use(express.json());
 
 // Sesión
 app.use(session({
-  secret: 'secreto_super_seguro', // puedes usar process.env.SESSION_SECRET también
+  secret: 'secreto_super_seguro', 
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // ponlo en true si usas HTTPS
+    secure: false, 
     sameSite: 'lax'
   }
 }));
@@ -42,6 +42,13 @@ app.use('/citas', citaRoutes);
 app.get('/', (req, res) => {
   res.send('¡Hola, PetHub! El servidor está corriendo.');
 });
+const cron = require('node-cron');
+const actualizarCitasPasadas = require('./middle/cronjobCitas');
+
+cron.schedule('*/10 * * * *', () => {
+  actualizarCitasPasadas();
+});
+
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

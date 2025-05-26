@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../axiosconfig';
 import './MisMascotas.css';
 
 const CitasPage = () => {
   const [citas, setCitas] = useState([]);
+  const [mascotas, setMascotas] = useState([]);
   const [formulario, setFormulario] = useState({
     fecha: '',
     hora: '',
     descripcion: '',
     mascotaId: '',
   });
-
+  const [verCanceladas, setVerCanceladas] = useState(false); 
   const esAdmin = localStorage.getItem('rol') === 'admin';
 
-  const obtenerCitas = async () => {
+  const obtenerCitas = useCallback(async () => {
     try {
       const endpoint = esAdmin ? '/citas/admin' : '/citas/activas';
       const res = await api.get(endpoint);
@@ -21,11 +22,21 @@ const CitasPage = () => {
     } catch (err) {
       console.error('Error al obtener citas:', err);
     }
-  };
+  }, [esAdmin]);
+
+  const obtenerMascotas = useCallback(async () => {
+    try {
+      const res = await api.get('/mascotas');
+      setMascotas(res.data);
+    } catch (err) {
+      console.error('Error al obtener mascotas:', err);
+    }
+  }, []);
 
   useEffect(() => {
     obtenerCitas();
-  }, [esAdmin]);
+    obtenerMascotas();
+  }, [obtenerCitas, obtenerMascotas]);
 
   const handleChange = (e) => {
     setFormulario({
@@ -54,7 +65,7 @@ const CitasPage = () => {
       if (res.status >= 200 && res.status < 300) {
         alert('Cita creada exitosamente. Por favor, recargue la página para confirmar.');
         setFormulario({ fecha: '', hora: '', descripcion: '', mascotaId: '' });
-
+        obtenerCitas();
       }
     } catch (err) {
       if (err.response && err.response.status === 409) {
@@ -68,16 +79,7 @@ const CitasPage = () => {
     }
   };
 
-  const handleDesactivar = async (id) => {
-    try {
-      await api.patch(`/citas/desactivar/${id}`);
-      setCitas(citas.map(c => (c.id === id ? { ...c, activo: false } : c)));
-    } catch (err) {
-      console.error('Error al desactivar cita:', err);
-      alert('Error al cancelar cita');
-    }
-  };
-
+  
   const handleEliminar = async (id) => {
     try {
       await api.delete(`/citas/${id}`);
@@ -88,46 +90,71 @@ const CitasPage = () => {
     }
   };
 
+  const citasActivas = citas.filter(c => {
+    const fechaCita = new Date(c.fecha_cita);
+    const ahora = new Date();
+    return c.activo && fechaCita >= ahora;
+  });
+
+  
+  const citasCanceladasOPasadas = citas.filter(c => {
+    const fechaCita = new Date(c.fecha_cita);
+    const ahora = new Date();
+    return !c.activo || fechaCita < ahora;
+  });
+
   return (
     <div className="contenedor">
       <h2 className="titulo">Citas</h2>
 
-      <form onSubmit={handleSubmit} className="formulario">
-        <input
-          type="date"
-          name="fecha"
-          value={formulario.fecha}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="time"
-          name="hora"
-          value={formulario.hora}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="descripcion"
-          placeholder="Descripción"
-          value={formulario.descripcion}
-          onChange={handleChange}
-          required
-          className="flexible"
-        />
-        <input
-          type="number"
-          name="mascotaId"
-          placeholder="ID de mascota"
-          value={formulario.mascotaId}
-          onChange={handleChange}
-          required
-          className="edad"
-          min={1}
-        />
-        <button type="submit">Agendar Cita</button>
-      </form>
+      {/* Botón para alternar entre vistas */}
+      <button onClick={() => setVerCanceladas(!verCanceladas)}>
+        {verCanceladas ? 'Ver Citas Activas' : 'Ver Citas Canceladas / Pasadas'}
+      </button>
+
+      {/* Mostrar formulario solo en vista citas activas */}
+      {!verCanceladas && (
+        <form onSubmit={handleSubmit} className="formulario">
+          <input
+            type="date"
+            name="fecha"
+            value={formulario.fecha}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="time"
+            name="hora"
+            value={formulario.hora}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="descripcion"
+            placeholder="Descripción"
+            value={formulario.descripcion}
+            onChange={handleChange}
+            required
+            className="flexible"
+          />
+          <select
+            name="mascotaId"
+            value={formulario.mascotaId}
+            onChange={handleChange}
+            required
+            className="edad"
+          >
+            <option value="">Seleccione una mascota</option>
+            {mascotas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
+            ))}
+          </select>
+          <button type="submit">Agendar Cita</button>
+        </form>
+      )}
 
       <table className="tabla">
         <thead>
@@ -140,38 +167,44 @@ const CitasPage = () => {
           </tr>
         </thead>
         <tbody>
-          {citas.filter(c => c.activo).map(c => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{new Date(c.fecha_cita).toLocaleString()}</td>
-              <td>{c.motivo}</td>
-              <td>{c.mascota_id}</td>
-              <td>
-                {esAdmin ? (
-                  <button
-                    onClick={() => {
-                      if (window.confirm('¿Eliminar permanentemente esta cita?')) {
-                        handleEliminar(c.id);
-                      }
-                    }}
-                    className="boton-eliminar"
-                  >
-                    Eliminar
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      if (window.confirm('¿Cancelar esta cita?')) {
-                        handleDesactivar(c.id);
-                      }
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
+          {(verCanceladas ? citasCanceladasOPasadas : citasActivas).map(c => {
+            const mascota = mascotas.find(m => m.id === c.mascota_id);
+            return (
+              <tr key={c.id}>
+                <td>{c.id}</td>
+                <td>{new Date(c.fecha_cita).toLocaleString()}</td>
+                <td>{c.motivo}</td>
+                <td>{mascota ? mascota.nombre : 'Sin mascota'}</td>
+                <td>
+                  {esAdmin ? (
+                    <button
+                      onClick={() => {
+                        if (window.confirm('¿Eliminar permanentemente esta cita?')) {
+                          handleEliminar(c.id);
+                        }
+                      }}
+                      className="boton-eliminar"
+                    >
+                      Eliminar
+                    </button>
+                  ) : (
+                    
+                    !verCanceladas && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm('¿Cancelar esta cita?')) {
+                            handleEliminar(c.id);
+                          }
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                    )
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

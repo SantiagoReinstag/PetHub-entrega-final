@@ -57,7 +57,7 @@ router.patch(
 // Eliminar cita (permiso eliminar_cita)
 router.delete(
   '/:id',
-  verificarPermiso('eliminar_citas'),
+  verificarPermiso('borrar_citas'),
   citaController.eliminarCita
 );
 
